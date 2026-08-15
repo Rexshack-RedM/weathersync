@@ -250,7 +250,7 @@ local function toggleSync()
 
 	TriggerEvent("chat:addMessage", {
 		color = {255, 255, 128},
-		args = {"Weather Sync", syncEnabled and "on" or "off"}
+		args = {syncEnabled and "on" or "off"}
 	})
 end
 
