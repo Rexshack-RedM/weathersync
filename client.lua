@@ -245,13 +245,7 @@ end
 
 local function toggleSync()
 	currentWeather = nil
-
 	syncEnabled = not syncEnabled
-
-	TriggerEvent("chat:addMessage", {
-		color = {255, 255, 128},
-		args = {syncEnabled and "on" or "off"}
-	})
 end
 
 local function setSyncEnabled(toggle)

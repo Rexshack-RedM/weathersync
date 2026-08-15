@@ -24,7 +24,7 @@ Config.weatherTypes = Config.isRDR and RDR2WeatherTypes or GTAVWeatherTypes
 Config.time = DHMSToTime(0, 6, 0, 0)
 
 -- Default ratio of in-game seconds to real seconds. Standard game time is 30:1, or 1 in-game minute = 2 real seconds. A value of 0 means time will be synced with the real server time.
-Config.timescale = 30
+Config.timescale = 4
 
 -- If Config.timescale is 0, offset the real server time by this many seconds.
 Config.realTimeOffset = 0
@@ -136,77 +136,86 @@ Config.defaultGtaWeatherPattern = {
 	}
 }
 
+-- Texas-style climate: mostly hot and sunny, with only occasional clouds,
+-- rare rain, and the odd summer thunderstorm that clears up quickly.
 Config.defaultRdrWeatherPattern = {
 	["sunny"] = {
-		["sunny"]  = 60,
-		["clouds"] = 40
+		["sunny"]  = 85,
+		["clouds"] = 15
 	},
 
 	["clouds"] = {
-		["clouds"]       = 25,
-		["sunny"]        = 40,
-		["misty"]        = 10,
-		["fog"]          = 10,
-		["overcastdark"] = 15
+		["clouds"]       = 20,
+		["sunny"]        = 70,
+		["misty"]        = 3,
+		["fog"]          = 2,
+		["overcastdark"] = 5
 	},
 
 	["overcastdark"] = {
 		["overcastdark"] = 5,
-		["clouds"]       = 60,
-		["overcast"]     = 30,
+		["clouds"]       = 70,
+		["sunny"]        = 15,
+		["overcast"]     = 5,
 		["thunder"]      = 5
 	},
 
 	["misty"] = {
-		["misty"]  = 25,
-		["clouds"] = 50,
-		["fog"]    = 25
+		["misty"]  = 10,
+		["clouds"] = 20,
+		["sunny"]  = 60,
+		["fog"]    = 10
 	},
 
 	["fog"] = {
-		["fog"]      = 25,
-		["clouds"]   = 25,
-		["misty"]    = 25,
-		["overcast"] = 25
+		["fog"]      = 10,
+		["clouds"]   = 20,
+		["sunny"]    = 50,
+		["misty"]    = 10,
+		["overcast"] = 10
 	},
 
 	["overcast"] = {
 		["overcast"]     = 5,
-		["overcastdark"] = 40,
-		["drizzle"]      = 30,
-		["shower"]       = 10,
-		["rain"]         = 15,
+		["clouds"]       = 45,
+		["overcastdark"] = 20,
+		["drizzle"]      = 15,
+		["shower"]       = 5,
+		["rain"]         = 10,
 	},
 
 	["drizzle"] = {
-		["drizzle"]      = 10,
+		["drizzle"]      = 5,
 		["overcast"]     = 10,
-		["rain"]         = 10,
-		["shower"]       = 10,
-		["overcastdark"] = 30,
-		["clouds"]       = 30
+		["rain"]         = 5,
+		["shower"]       = 5,
+		["overcastdark"] = 15,
+		["clouds"]       = 60
 	},
 
 	["rain"] = {
 		["rain"]         = 5,
-		["overcastdark"] = 55,
-		["drizzle"]      = 20,
+		["overcastdark"] = 30,
+		["clouds"]       = 30,
+		["drizzle"]      = 15,
 		["shower"]       = 5,
 		["thunderstorm"] = 10,
 		["hurricane"]    = 5
 	},
 
 	["thunder"] = {
-		["thunder"]      = 10,
-		["overcastdark"] = 50,
+		["thunder"]      = 5,
+		["overcastdark"] = 25,
+		["clouds"]       = 30,
 		["thunderstorm"] = 40
 	},
 
 	["thunderstorm"] = {
 		["thunderstorm"] = 5,
-		["thunder"]      = 35,
-		["rain"]         = 30,
-		["drizzle"]      = 20,
+		["thunder"]      = 15,
+		["clouds"]       = 40,
+		["rain"]         = 20,
+		["drizzle"]      = 10,
 		["shower"]       = 10
 	},
 
@@ -218,8 +227,9 @@ Config.defaultRdrWeatherPattern = {
 
 	["shower"] = {
 		["shower"]       = 5,
-		["overcast"]     = 10,
-		["overcastdark"] = 85
+		["clouds"]       = 30,
+		["overcast"]     = 15,
+		["overcastdark"] = 50
 	}
 }
 
