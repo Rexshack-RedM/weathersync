@@ -40,94 +40,148 @@ const rdrWeatherIcons = {
 	whiteout:       "❄️"
 };
 
-var weatherIcons = {};
+const conditionLabels = {
+	blizzard:       "Blizzard",
+	clear:          "Clear",
+	clearing:       "Clearing",
+	clouds:         "Cloudy",
+	extrasunny:     "Sunny",
+	foggy:          "Foggy",
+	halloween:      "Halloween",
+	neutral:        "Rain",
+	overcast:       "Overcast",
+	rain:           "Rain",
+	smog:           "Smog",
+	snow:           "Snow",
+	snowlight:      "Light Snow",
+	thunder:        "Thunder",
+	xmas:           "Snow",
+	drizzle:        "Drizzle",
+	fog:            "Fog",
+	groundblizzard: "Ground Blizzard",
+	hail:           "Hail",
+	highpressure:   "High Pressure",
+	hurricane:      "Hurricane",
+	misty:          "Misty",
+	overcastdark:   "Dark Overcast",
+	sandstorm:      "Sandstorm",
+	shower:         "Shower",
+	sleet:          "Sleet",
+	sunny:          "Sunny",
+	thunderstorm:   "Thunderstorm",
+	whiteout:       "Whiteout"
+};
 
+var weatherIcons = {};
 var isRDR = false;
 
-function toggleDisplay(e, display) {
-	if (e.style.display == display) {
-		e.style.display = 'none';
-	} else {
-		e.style.display = display;
-	}
-}
-
 function toggleForecast() {
-	toggleDisplay(document.querySelector('#forecast'), 'table');
-	toggleDisplay(document.querySelector('#sync'), 'block');
-	toggleDisplay(document.querySelector('#altimeter'), 'block');
-	toggleDisplay(document.querySelector('#wind'), 'block');
+    var app = document.querySelector('#weather-app');
+    if (!app) return;
 
-	if (isRDR) {
-		toggleDisplay(document.querySelector('#temperature'), 'block');
-	}
+    if (app.classList.contains('hidden')) {
+        app.classList.remove('hidden');
+    } else {
+        app.classList.add('hidden');
+    }
 }
 
 function dayOfWeek(day) {
 	return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day];
 }
 
-function updateForecast(data) {
-	var f = document.querySelector('#forecast');
-	var t = document.querySelector('#temperature');
-	var w = document.querySelector('#wind');
-
-	var as = document.getElementById('altitude-sea');
-	var at = document.getElementById('altitude-terrain');
-
-	var forecastData = JSON.parse(data.forecast)
-
-	f.innerHTML = '';
-
-	var prevDay;
-
-	for (var i = 0; i < forecastData.length; ++i) {
-		var hour = document.createElement('div');
-		hour.className = 'forecast-hour';
-
-		var day = document.createElement('div');
-		day.className = 'forecast-day';
-
-		if (forecastData[i].day != prevDay) {
-			day.innerHTML = dayOfWeek(forecastData[i].day);
-			prevDay = forecastData[i].day;
+function aggregateDaily(forecastData) {
+	var days = {};
+	for (var i = 0; i < forecastData.length; i++) {
+		var d = forecastData[i].day;
+		if (!days[d]) {
+			days[d] = { day: d, weather: forecastData[i].weather };
 		}
-		
+	}
+	var result = [];
+	for (var key in days) {
+		result.push(days[key]);
+	}
+	return result;
+}
+
+function updateForecast(data) {
+	var forecastData = JSON.parse(data.forecast);
+	var app = document.querySelector('#weather-app');
+	var dailyData = aggregateDaily(forecastData);
+
+	document.querySelector('#current-condition').textContent = conditionLabels[forecastData[0].weather] || forecastData[0].weather;
+	document.querySelector('#current-temp').textContent = data.temperature;
+
+	var currentHiLo = 'H: ' + data.temperature + '  L: ' + data.temperature;
+	document.querySelector('#current-hilo').textContent = currentHiLo;
+
+	var hourlyScroll = document.querySelector('#hourly-scroll');
+	hourlyScroll.innerHTML = '';
+	for (var i = 0; i < forecastData.length; i++) {
+		var item = document.createElement('div');
+		item.className = 'hourly-item';
+
 		var time = document.createElement('div');
-		time.className = 'forecast-time';
-		time.innerHTML = forecastData[i].time;
-		
-		var weather = document.createElement('div');
-		weather.className = 'forecast-weather';
-		weather.innerHTML = weatherIcons[forecastData[i].weather] || forecastData[i].weather;
+		time.className = 'hourly-time';
+		time.textContent = i === 0 ? 'Now' : forecastData[i].time;
 
-		var wind = document.createElement('div');
-		wind.className = 'forecast-wind';
-		wind.innerHTML = forecastData[i].wind;
+		var icon = document.createElement('div');
+		icon.className = 'hourly-icon';
+		icon.textContent = weatherIcons[forecastData[i].weather] || '☀️';
 
-		hour.appendChild(day);
-		hour.appendChild(time);
-		hour.appendChild(weather);
-		hour.appendChild(wind);
-		f.appendChild(hour);
+		item.appendChild(time);
+		item.appendChild(icon);
+		hourlyScroll.appendChild(item);
 	}
 
-	t.innerHTML = data.temperature;
+	var dailyList = document.querySelector('#daily-list');
+	dailyList.innerHTML = '';
 
-	w.innerHTML = data.wind;
+	var today = new Date();
+	var todayDay = today.getDay();
 
-	as.innerHTML = data.altitudeSea;
-	at.innerHTML = data.altitudeTerrain;
+	for (var j = 0; j < dailyData.length; j++) {
+		var dd = dailyData[j];
+		var row = document.createElement('div');
+		row.className = 'daily-row';
+
+		var dayLabel = document.createElement('div');
+		dayLabel.className = 'daily-day';
+		if (j === 0) {
+			dayLabel.textContent = 'Today';
+		} else {
+			dayLabel.textContent = dayOfWeek((todayDay + j) % 7);
+		}
+
+		var icon2 = document.createElement('div');
+		icon2.className = 'daily-icon';
+		icon2.textContent = weatherIcons[dd.weather] || '☀️';
+
+		var windStr = document.createElement('div');
+		windStr.className = 'daily-wind';
+		windStr.textContent = forecastData[j * Math.floor(forecastData.length / dailyData.length)]?.wind || '';
+
+		row.appendChild(dayLabel);
+		row.appendChild(icon2);
+		row.appendChild(windStr);
+		dailyList.appendChild(row);
+	}
+
+	document.querySelector('#wind-value').textContent = data.wind || '--';
+	document.querySelector('#altitude-value').textContent = data.altitudeSea + 'm MSL';
 
 	if (data.syncEnabled) {
-		document.getElementById('sync-status').innerHTML = '✔️';
+		document.querySelector('#sync-indicator').textContent = 'Sync Active';
 	} else {
-		document.getElementById('sync-status').innerHTML = '🚫';
+		document.querySelector('#sync-indicator').textContent = 'Sync Disabled';
 	}
+
+	app.classList.remove('hidden');
 }
 
 function openAdminUi(data) {
-	document.querySelector('#admin-ui').style.display = 'block';
+	document.querySelector('#admin-ui').classList.remove('hidden');
 }
 
 function updateAdminUi(data) {
@@ -181,7 +235,7 @@ window.addEventListener('message', function (event) {
 });
 
 window.addEventListener('load', function() {
-	fetch(`https://${GetParentResourceName()}/getGameName`).then(resp => resp.json()).then(resp => {
+	fetch('https://' + GetParentResourceName() + '/getGameName').then(function(resp) { return resp.json(); }).then(function(resp) {
 		if (resp.gameName == "rdr3") {
 			isRDR = true;
 			weatherIcons = rdrWeatherIcons;
@@ -282,7 +336,7 @@ window.addEventListener('load', function() {
 	});
 
 	document.querySelector('#admin-ui-close-btn').addEventListener('click', function(event) {
-		document.querySelector('#admin-ui').style.display = 'none';
+		document.querySelector('#admin-ui').classList.add('hidden');
 
 		fetch('https://' + GetParentResourceName() + '/closeAdminUi', {
 			method: 'POST',
@@ -292,4 +346,33 @@ window.addEventListener('load', function() {
 			body: "{}"
 		});
 	});
+
+	var forecastClose = document.querySelector('#forecast-close-btn');
+	var forecastBack = document.querySelector('#forecast-back-btn');
+	var adminCloseTop = document.querySelector('#admin-ui-close-btn-top');
+
+	if (forecastClose) {
+		forecastClose.addEventListener('click', function() {
+			document.querySelector('#weather-app').classList.add('hidden');
+		});
+	}
+
+	if (forecastBack) {
+		forecastBack.addEventListener('click', function() {
+			document.querySelector('#weather-app').classList.add('hidden');
+		});
+	}
+
+	if (adminCloseTop) {
+		adminCloseTop.addEventListener('click', function() {
+			document.querySelector('#admin-ui').classList.add('hidden');
+			fetch('https://' + GetParentResourceName() + '/closeAdminUi', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: "{}"
+			});
+		});
+	}
 });

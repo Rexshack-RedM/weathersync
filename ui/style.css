@@ -1,220 +1,657 @@
 @font-face {
-	font-family: "Chinese Rocks";
-	src: url('CHINESER.TTF');
+    font-family: "Chinese Rocks";
+    src: url("CHINESER.TTF");
 }
 
-html, body {
-	background: none;
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
+/* ============================================================
+   RDR2 LEATHER & GOLD — MONOCHROME EDITION
+   ============================================================ */
+
+:root {
+    --rdr-black: #000000;
+    --rdr-panel: #0a0a0a;
+    --rdr-panel-2: #141414;
+    --rdr-leather: #1c1c1c;
+    --rdr-red: #4a4a4a;
+    --rdr-red-bright: #2a2a2a;
+    --rdr-gold: #ffffff;
+    --rdr-gold-dim: #5a5a5a;
+    --rdr-parchment: #ffffff;
+    --rdr-text: #f2f2f2;
+    --rdr-muted: #9a9a9a;
+    --rdr-green: #5a7d4f;
+    --rdr-cost-ok: #6fbf73;
+    --rdr-cost-over: #e0554f;
+    --rdr-amber: #d9a441;
+    --rdr-shadow: rgba(0, 0, 0, 0.85);
 }
 
-#forecast {
-	display: none;
-	position: absolute;
-	top: 50vh;
-	right: 0vw;
-	transform: translate(0, -50%);
-	background-color: rgba(0, 0, 0, 0.5);
-	color: white;
-	padding-top: 0.25vw;
-	padding-bottom: 0.25vw;
-	padding-left: 0.5vw;
-	padding-right: 0.5vw;
-	font-size: 1.7vw;
-	font-family: "Chinese Rocks";
+* {
+    box-sizing: border-box;
 }
 
-.forecast-hour {
-	display: table-row;
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent !important;
+    overflow: hidden;
+    user-select: none;
+    font-family: "Roboto", Arial, sans-serif;
+    color: var(--rdr-text);
 }
 
-.forecast-day {
-	display: table-cell;
-	text-align: left;
-	vertical-align: middle;
-	font-size: 75%;
-	padding: 0 0.5vw 0 0;
+button,
+input,
+select {
+    font-family: "Roboto", Arial, sans-serif;
 }
 
-.forecast-time {
-	display: table-cell;
-	text-align: right;
-	vertical-align: middle;
+.hidden {
+    display: none !important;
 }
 
-.forecast-weather {
-	display: table-cell;
-	text-align: right;
-	vertical-align: middle;
+/* Shared engraved panel treatment */
+#weather-app,
+#admin-ui {
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,0.015) 0,
+            rgba(255,255,255,0.015) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(
+            160deg,
+            var(--rdr-panel-2),
+            var(--rdr-panel) 60%,
+            var(--rdr-black)
+        );
+    border: 1px solid var(--rdr-gold-dim);
+    outline: 1px solid rgba(0,0,0,0.6);
+    outline-offset: -5px;
+    box-shadow:
+        0 20px 60px var(--rdr-shadow),
+        inset 0 0 40px rgba(0,0,0,0.5);
+    border-radius: 3px;
 }
 
-.forecast-wind {
-	display: table-cell;
-	text-align: left;
-	vertical-align: middle;
-	font-size: 50%;
+/* ============================================================
+   FORECAST
+   ============================================================ */
+
+#weather-app {
+    position: fixed;
+    inset: auto auto auto auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(430px, 92vw);
+    max-height: 88vh;
+    overflow: hidden;
+    z-index: 100;
 }
 
-#temperature {
-	display: none;
-	position: absolute;
-	top: 0;
-	left: 50%;
-	transform: translate(-50%, 0);
-	background-color: rgba(0, 0, 0, 0.5);
-	color: white;
-	font-size: 1.7vw;
-	font-family: "Chinese Rocks";
-	padding: 0.5vh 0.5vw;
+#weather-bg {
+    display: none;
 }
 
-#wind {
-	display: none;
-	position: absolute;
-	bottom: 0;
-	left: 50%;
-	transform: translate(-50%, 0);
-	background-color: rgba(0, 0, 0, 0.5);
-	color: white;
-	font-size: 1.7vw;
-	font-family: "Chinese Rocks";
-	padding: 0.5vh 0.5vw;
+#weather-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 88vh;
+    overflow: hidden;
 }
 
-#sync {
-	display: none;
-	position: absolute;
-	bottom: 1%;
-	left: 1%;
-	color: white;
-	font-size: 2vh;
-	font-family: "Chinese Rocks";
+.weather-header,
+.admin-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    padding: 14px 48px 8px;
 }
 
-#altimeter {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 0;
-	transform: translate(0, -50%);
-	color: white;
-	background-color: rgba(0, 0, 0, 0.5);
-	font-size: 1.7vw;
-	font-family: "Chinese Rocks";
-	padding: 0.5vh 0.5vw;
+.header-copy {
+    text-align: center;
+    min-width: 0;
 }
 
-#altimeter-gauges {
-	display: table;
+.header-title {
+    color: var(--rdr-gold);
+    font-size: 24px;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow:
+        0 1px 0 #000,
+        0 0 12px rgba(255,255,255,0.12);
 }
 
-.altimeter-gauge {
-	display: table-row;
+.header-subtitle {
+    margin-top: 5px;
+    color: var(--rdr-muted);
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
 }
 
-.altimeter-gauge-label, .altimeter-gauge-value {
-	display: table-cell;
+.circle-btn {
+    position: absolute;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 1px solid var(--rdr-gold-dim);
+    border-radius: 50%;
+    color: var(--rdr-text);
+    background: radial-gradient(circle at 35% 30%, #303030, #111111 68%, #050505);
+    font-size: 20px;
+    line-height: 29px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    transition: filter 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.altimeter-gauge-value {
-	text-align: right;
-	padding-left: 0.5vw;
+.circle-btn:hover {
+    border-color: var(--rdr-gold);
+    filter: brightness(1.35);
 }
+
+.circle-btn:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+#forecast-back-btn {
+    left: 13px;
+}
+
+#forecast-close-btn {
+    right: 13px;
+}
+
+#admin-ui-close-btn-top {
+    right: 13px;
+}
+
+.section-divider {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 20px 5px;
+    color: var(--rdr-gold-dim);
+    font-size: 9px;
+    line-height: 1;
+}
+
+.section-divider::before,
+.section-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.28),
+        var(--rdr-gold-dim)
+    );
+}
+
+.section-divider::after {
+    background: linear-gradient(
+        90deg,
+        var(--rdr-gold-dim),
+        rgba(255,255,255,0.28),
+        transparent
+    );
+}
+
+#current-weather {
+    flex-shrink: 0;
+    padding: 10px 20px 12px;
+    text-align: center;
+}
+
+#current-condition {
+    color: var(--rdr-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+#current-temp {
+    margin: 5px 0 2px;
+    color: var(--rdr-gold);
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+}
+
+#current-hilo {
+    color: var(--rdr-muted);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+#hourly-section {
+    flex-shrink: 0;
+    margin: 0 15px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(90,90,90,0.65);
+    border-bottom: 1px solid rgba(90,90,90,0.65);
+    overflow: hidden;
+}
+
+#hourly-scroll {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    padding: 2px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+#hourly-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.hourly-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 7px 5px;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.hourly-item:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.15));
+    border-color: rgba(90,90,90,0.7);
+    transform: translateY(-1px);
+}
+
+.hourly-time {
+    color: var(--rdr-muted);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.hourly-icon {
+    margin-top: 5px;
+    font-size: 18px;
+    line-height: 1;
+    filter: grayscale(0.7);
+}
+
+#daily-section {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 230px;
+    padding: 7px 15px 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+#daily-section::-webkit-scrollbar {
+    display: none;
+}
+
+.daily-row {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 6px;
+    padding: 8px 11px;
+    gap: 10px;
+    border: 1px solid rgba(90,90,90,0.28);
+    border-radius: 2px;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.03),
+        rgba(0,0,0,0.15)
+    );
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.daily-row:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.07),
+        rgba(0,0,0,0.12)
+    );
+    border-color: var(--rdr-gold);
+    transform: translateX(2px);
+}
+
+.daily-day {
+    width: 58px;
+    flex-shrink: 0;
+    color: var(--rdr-text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.daily-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid var(--rdr-gold-dim);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #303030, #101010 70%);
+    font-size: 15px;
+    filter: grayscale(0.65);
+}
+
+.daily-wind {
+    flex: 1;
+    text-align: right;
+    color: var(--rdr-muted);
+    font-size: 10px;
+    font-style: italic;
+}
+
+#details-section {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 9px 15px 7px;
+    flex-shrink: 0;
+}
+
+.detail-card {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid rgba(90,90,90,0.35);
+    border-radius: 2px;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.035),
+        rgba(0,0,0,0.2)
+    );
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.35);
+}
+
+.detail-label {
+    margin-bottom: 4px;
+    color: var(--rdr-muted);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.detail-value {
+    color: var(--rdr-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#sync-status-bar {
+    flex-shrink: 0;
+    padding: 5px 15px 11px;
+    text-align: center;
+}
+
+#sync-indicator {
+    color: var(--rdr-muted);
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
 
 #admin-ui {
-	display: none;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background-color: rgba(0, 0, 0, 0.5);
-	color: white;
-	font-size: 0.75vw;
-	font-family: "Chinese Rocks";
-	padding: 0.5vh 0.5vw;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 200;
+    width: min(460px, 92vw);
+    max-height: 86vh;
+    padding: 0 13px 13px;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    color: var(--rdr-text);
+    font-size: 11px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rdr-gold-dim) transparent;
+}
+
+#admin-ui::-webkit-scrollbar {
+    width: 5px;
+}
+
+#admin-ui::-webkit-scrollbar-thumb {
+    background: var(--rdr-gold-dim);
+    border-radius: 4px;
+}
+
+.admin-header {
+    margin: 0 -13px;
 }
 
 .admin-ui-option-group {
-	display: block;
-	border-bottom: solid 1px white;
-	border-collapse: collapse;
-	padding: 0.5vh 0.5vw;
-}
-
-.input-group {
-	display: table;
-	width: 100%;
-}
-
-.labelled-input {
-	display: table-row;
-}
-
-.labelled-input .label, .labelled-input .input {
-	display: table-cell;
-	padding: 0.25vh 0.25vw;
-	font-size: inherit;
-}
-
-.input * {
-	font-size: inherit;
-	font-family: inherit;
-}
-
-.input input[type=number], .input input[type=text], .input select {
-	width: 100%;
-}
-
-.input *[readonly] {
-	background: none;
-	border: none;
-	color: white;
-}
-
-.admin-ui-option-group-controls {
-	padding: 1vh 0;
-}
-
-button {
-	font-size: inherit;
-	color: white;
-	background-color: rgba(0, 0, 0, 0.5);
-	border: solid 1px white;
-	padding: 0.3vh 0.3vw;
-	font-family: inherit;
-	outline: none;
-}
-
-button:hover, button:focus {
-	background-color: rgba(255, 0, 0, 0.5);
-	color: white;
-}
-
-button:active {
-	background-color: rgba(255, 255, 255, 1.0);
-	color: black;
+    display: block;
+    margin: 9px 0;
+    padding: 12px;
+    border: 1px solid rgba(90,90,90,0.3);
+    border-radius: 2px;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.025),
+        rgba(0,0,0,0.18)
+    );
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.25);
 }
 
 .admin-ui-option-group .title {
-	display: block;
-	font-size: 1vw;
+    display: flex;
+    align-items: center;
+    min-height: 22px;
+    margin-bottom: 9px;
+    color: var(--rdr-gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
-.time {
-	display: table-row;
+.admin-ui-option-group .title::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    margin-left: 10px;
+    background: linear-gradient(90deg, var(--rdr-gold-dim), transparent);
+    opacity: 0.55;
 }
 
-.time .label {
-	display: table-cell;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 5px;
 }
 
-.time input {
-	display: table-cell;
+.labelled-input {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(150px, 1.3fr);
+    align-items: center;
+    min-height: 30px;
+    gap: 10px;
+}
+
+.labelled-input .label {
+    color: var(--rdr-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.labelled-input .input {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.input * {
+    font-size: 10px;
+    font-family: "Roboto", Arial, sans-serif;
+}
+
+.input input[type="number"],
+.input input[type="text"],
+.input select,
+#admin-ui input[type="number"],
+#admin-ui input[type="text"],
+#admin-ui select {
+    width: 100%;
+    min-height: 27px;
+    padding: 5px 7px;
+    color: var(--rdr-text);
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--rdr-gold-dim);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+#admin-ui select {
+    appearance: auto;
+}
+
+#admin-ui input:focus,
+#admin-ui select:focus {
+    border-color: var(--rdr-gold);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+}
+
+.input input[readonly],
+#admin-ui input[readonly] {
+    color: var(--rdr-muted);
+    background: rgba(0,0,0,0.2);
+}
+
+#admin-ui input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--rdr-gold);
+    cursor: pointer;
+}
+
+.admin-ui-option-group-controls {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 9px;
+}
+
+button,
+.wood-btn {
+    color: var(--rdr-text);
+    background: linear-gradient(180deg, #2e2e2e, #141414);
+    border: 1px solid var(--rdr-gold-dim);
+    border-radius: 2px;
+    padding: 7px 13px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    outline: none;
+    cursor: pointer;
+    transition:
+        filter 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+button:hover,
+.wood-btn:hover,
+button:focus {
+    border-color: var(--rdr-gold);
+    filter: brightness(1.3);
+}
+
+button:active,
+.wood-btn:active {
+    transform: translateY(1px);
 }
 
 .admin-ui-controls {
-	text-align: center;
-	padding: 1vh 1vw;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 2px;
+}
+
+#admin-ui-close-btn {
+    min-width: 105px;
+    background: linear-gradient(180deg, #1c1c1c, #0a0a0a);
+    color: var(--rdr-muted);
+}
+
+.time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.time .label,
+.time input {
+    display: block;
+}
+
+/* Kept for compatibility with the original resource. */
+#altimeter,
+#temperature,
+#wind,
+#sync,
+#forecast {
+    display: none;
+}
+
+/* Responsive sizing for smaller RedM windows */
+@media (max-width: 700px) {
+    #weather-app {
+        width: min(430px, 94vw);
+    }
+
+    #admin-ui {
+        width: min(460px, 94vw);
+    }
+
+    .labelled-input {
+        grid-template-columns: 1fr 1.25fr;
+    }
 }
